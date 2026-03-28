@@ -1,7 +1,7 @@
 -- ============================================================
 --  MedLab v2.0 — Flyway V2 Seed Data
---  Passwords are BCrypt-hashed value of "Admin@123"
---  Hash: $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lHHy
+--  Passwords are BCrypt-hashed value of "Admin@123" ($2b$, cost 10; Spring-compatible)
+--  Hash: $2b$10$3NAqourB0O.3iiKcCVz7lebtnzzpZFp7muXfiK6A8v.Qd0MhwKLFu
 -- ============================================================
 
 -- ── Roles ─────────────────────────────────────────────────────
@@ -22,37 +22,37 @@ INSERT IGNORE INTO users
 VALUES
     ('admin',
      'admin@medlab.com',
-     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lHHy',
+     '$2b$10$3NAqourB0O.3iiKcCVz7lebtnzzpZFp7muXfiK6A8v.Qd0MhwKLFu',
      'System Administrator', 'ACTIVE', 'SYSTEM'),
 
     ('labmanager1',
      'labmanager@medlab.com',
-     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lHHy',
+     '$2b$10$3NAqourB0O.3iiKcCVz7lebtnzzpZFp7muXfiK6A8v.Qd0MhwKLFu',
      'Lab Manager One', 'ACTIVE', 'SYSTEM'),
 
     ('labtech1',
      'labtech1@medlab.com',
-     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lHHy',
+     '$2b$10$3NAqourB0O.3iiKcCVz7lebtnzzpZFp7muXfiK6A8v.Qd0MhwKLFu',
      'Lab Technician One', 'ACTIVE', 'SYSTEM'),
 
     ('labtech2',
      'labtech2@medlab.com',
-     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lHHy',
+     '$2b$10$3NAqourB0O.3iiKcCVz7lebtnzzpZFp7muXfiK6A8v.Qd0MhwKLFu',
      'Lab Technician Two', 'ACTIVE', 'SYSTEM'),
 
     ('doctor1',
      'doctor1@medlab.com',
-     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lHHy',
+     '$2b$10$3NAqourB0O.3iiKcCVz7lebtnzzpZFp7muXfiK6A8v.Qd0MhwKLFu',
      'Dr. Priya Sharma', 'ACTIVE', 'SYSTEM'),
 
     ('reception1',
      'reception1@medlab.com',
-     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lHHy',
+     '$2b$10$3NAqourB0O.3iiKcCVz7lebtnzzpZFp7muXfiK6A8v.Qd0MhwKLFu',
      'Receptionist One', 'ACTIVE', 'SYSTEM'),
 
     ('billing1',
      'billing1@medlab.com',
-     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lHHy',
+     '$2b$10$3NAqourB0O.3iiKcCVz7lebtnzzpZFp7muXfiK6A8v.Qd0MhwKLFu',
      'Billing Staff One', 'ACTIVE', 'SYSTEM');
 
 -- ── Assign roles to users ────────────────────────────────────
