@@ -8,9 +8,14 @@
   <link rel="stylesheet" th:href="@{/css/main.css}"/>
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script th:src="@{/js/app.js}" defer></script>
+  <!--
+    Apply saved theme BEFORE the page renders to prevent a flash of wrong theme.
+    This runs synchronously in <head>, before CSS is painted.
+  -->
   <script>
     (function() {
-      const t = localStorage.getItem('medlab-theme') ||
+      var t = localStorage.getItem('medlab-theme') ||
         (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', t);
     })();
@@ -22,17 +27,18 @@
 <nav th:fragment="navbar" class="navbar">
   <div class="navbar-brand">
     <i class="fa fa-flask"></i> MedLab
-    <button id="theme-toggle" title="Toggle Dark Mode" style="margin-left: 10px;">
-      <i class="fa fa-moon"></i>
-    </button>
     <span class="version">v2.0</span>
   </div>
   <div class="navbar-right">
+    <!-- Theme toggle — sits left of user info, right of centre -->
+    <button id="theme-toggle" title="Switch to Dark Mode" aria-label="Toggle colour theme">
+      <i class="fa fa-moon"></i>
+    </button>
     <span class="user-info" sec:authorize="isAuthenticated()">
       <i class="fa fa-user-circle"></i>
       <span sec:authentication="name">User</span>
     </span>
-    <form th:action="@{/logout}" method="post" class="d-inline" style="display:inline;">
+    <form th:action="@{/logout}" method="post" style="display:inline;">
       <button type="submit" class="btn btn-sm btn-danger" style="cursor:pointer;">
         <i class="fa fa-sign-out-alt"></i> Logout
       </button>

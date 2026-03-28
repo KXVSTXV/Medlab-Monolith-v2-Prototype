@@ -100,42 +100,57 @@ function confirmAction(message, callback) {
 }
 
 // ── Dark / Light mode toggle ──────────────────────────────────
+//
+// Architecture:
+//   1. <head> inline script (in layout.html) applies the saved theme
+//      synchronously BEFORE paint — prevents flash of wrong theme.
+//   2. This IIFE wires the button, syncs the icon, and applies theme changes
+//      from other tabs/windows via the storage event (localStorage is shared).
+//   3. CSS (main.css) uses one shared duration for html, body, tables, etc.
 
 (function () {
-  // Apply saved theme immediately (also done in <head> to avoid flash)
-  const saved = localStorage.getItem('medlab-theme') ||
-    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-  document.documentElement.setAttribute('data-theme', saved);
+  const THEME_KEY = 'medlab-theme';
 
-  function syncIcon(theme) {
+  function syncButton(theme) {
     const btn = document.getElementById('theme-toggle');
     if (!btn) return;
     const icon = btn.querySelector('i');
     if (!icon) return;
     if (theme === 'dark') {
-      icon.classList.remove('fa-moon');
-      icon.classList.add('fa-sun');
+      icon.className = 'fa fa-sun';
       btn.title = 'Switch to Light Mode';
+      btn.setAttribute('aria-label', 'Switch to Light Mode');
     } else {
-      icon.classList.remove('fa-sun');
-      icon.classList.add('fa-moon');
+      icon.className = 'fa fa-moon';
       btn.title = 'Switch to Dark Mode';
+      btn.setAttribute('aria-label', 'Switch to Dark Mode');
     }
   }
 
+  function applyTheme(theme) {
+    if (theme !== 'dark' && theme !== 'light') return;
+    document.documentElement.setAttribute('data-theme', theme);
+    syncButton(theme);
+  }
+
+  window.addEventListener('storage', function (e) {
+    if (e.key !== THEME_KEY || e.newValue == null) return;
+    applyTheme(e.newValue);
+  });
+
   document.addEventListener('DOMContentLoaded', function () {
     const current = document.documentElement.getAttribute('data-theme') || 'light';
-    syncIcon(current);
+    syncButton(current);
 
     const btn = document.getElementById('theme-toggle');
     if (!btn) return;
 
     btn.addEventListener('click', function () {
-      const now = document.documentElement.getAttribute('data-theme');
-      const next = now === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('medlab-theme', next);
-      syncIcon(next);
+      const now = document.documentElement.getAttribute('data-theme') || 'light';
+      const next = (now === 'dark') ? 'light' : 'dark';
+      applyTheme(next);
+      localStorage.setItem(THEME_KEY, next);
     });
   });
+
 })();

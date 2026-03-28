@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Login | MedLab</title>
   <link rel="stylesheet" th:href="@{/css/main.css}"/>
+  <script>
+    (function() {
+      var t = localStorage.getItem('medlab-theme') ||
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+  <script th:src="@{/js/app.js}" defer></script>
 </head>
 <body class="login-body">
 

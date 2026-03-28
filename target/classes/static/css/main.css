@@ -33,6 +33,9 @@
   --font:        'Segoe UI', system-ui, -apple-system, sans-serif;
   --radius:      8px;
   --shadow:      0 2px 8px rgba(0,0,0,.08);
+  /* One duration for theme crossfade (html, body, tables, cards, …). */
+  --theme-transition-duration: 1.5s;
+  --theme-transition-timing: ease;
 }
 
 [data-theme='dark'] {
@@ -60,11 +63,41 @@
 /* ── Reset ───────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 14px; scroll-behavior: smooth; }
-body { 
-  font-family: var(--font); color: var(--text); background: var(--bg);
-  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+body {
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--bg);
+  transition:
+    background-color var(--theme-transition-duration) var(--theme-transition-timing),
+    color var(--theme-transition-duration) var(--theme-transition-timing);
 }
-* { transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+/*
+  Theme crossfade: html + body + listed components share the same duration.
+  body paints the page background; without its own transition it changed instantly
+  while .table cells were animating. .btn / .form-control define their own
+  transition lists so focus/hover stays snappy.
+*/
+html {
+  transition:
+    background-color var(--theme-transition-duration) var(--theme-transition-timing),
+    color var(--theme-transition-duration) var(--theme-transition-timing);
+}
+.card,
+.card-header,
+.sidebar,
+.navbar,
+.table th,
+.table td,
+.badge,
+.alert,
+.stat-card,
+.report-summary {
+  transition:
+    background-color var(--theme-transition-duration) var(--theme-transition-timing),
+    color var(--theme-transition-duration) var(--theme-transition-timing),
+    border-color var(--theme-transition-duration) var(--theme-transition-timing),
+    box-shadow var(--theme-transition-duration) var(--theme-transition-timing);
+}
 a { color: var(--primary); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
@@ -122,21 +155,29 @@ a:hover { text-decoration: underline; }
 
 #theme-toggle {
   background: none;
-  border: none;
+  border: 1px solid rgba(255,255,255,.25);
   color: #fff;
-  font-size: 1.1rem;
+  font-size: 1rem;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 50%;
+  padding: 5px 9px;
+  border-radius: 20px;          /* pill shape — distinguishable from icon buttons */
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s, transform 0.2s;
+  gap: 5px;
+  /* Keep this transition short — the theme crossfade is on html/cards separately */
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  white-space: nowrap;
 }
 
 #theme-toggle:hover {
   background: rgba(255,255,255,.15);
-  transform: rotate(15deg);
+  border-color: rgba(255,255,255,.5);
+  transform: scale(1.05);
+}
+
+#theme-toggle:active {
+  transform: scale(0.95);
 }
 
 .user-info {
@@ -224,7 +265,12 @@ a:hover { text-decoration: underline; }
   font-weight: 500;
   cursor: pointer;
   border: 1px solid transparent;
-  transition: all .15s;
+  transition:
+    background-color var(--theme-transition-duration) var(--theme-transition-timing),
+    color var(--theme-transition-duration) var(--theme-transition-timing),
+    border-color var(--theme-transition-duration) var(--theme-transition-timing),
+    transform 0.15s ease,
+    opacity 0.15s ease;
   white-space: nowrap;
 }
 
@@ -285,7 +331,11 @@ a:hover { text-decoration: underline; }
   border-radius: 6px;
   font-size: 0.9rem;
   font-family: var(--font);
-  transition: border-color .15s, box-shadow .15s;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color var(--theme-transition-duration) var(--theme-transition-timing),
+    color var(--theme-transition-duration) var(--theme-transition-timing);
 }
 
 .form-control:focus {

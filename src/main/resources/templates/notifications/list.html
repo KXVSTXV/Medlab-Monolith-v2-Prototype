@@ -8,18 +8,40 @@
   <main class="main-content">
     <div class="page-header"><h2><i class="fa fa-bell"></i> Notifications</h2></div>
     <div class="card">
-      <div class="card-body">
-        <table class="table">
-          <thead><tr><th>ID</th><th>Message</th><th>Type</th><th>Status</th></tr></thead>
+      <div class="card-body p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Message</th>
+              <th>Type</th>
+              <th>Delivery Status</th>
+              <th>Read</th>
+              <th>Sent At</th>
+            </tr>
+          </thead>
           <tbody>
-            <tr th:each="n : ${notifications}">
+            <tr th:each="n : ${notifications.content}">
               <td th:text="${n.id}"></td>
               <td th:text="${n.message}"></td>
-              <td th:text="${n.type}"></td>
-              <td th:text="${n.status}"></td>
+              <td>
+                <span class="badge badge-info" th:text="${n.type}"></span>
+              </td>
+              <td>
+                <span class="badge"
+                      th:classappend="${n.deliveryStatus.name() == 'SENT'} ? 'badge-success'
+                                     : (${n.deliveryStatus.name() == 'FAILED'} ? 'badge-danger'
+                                     : 'badge-warning')"
+                      th:text="${n.deliveryStatus}"></span>
+              </td>
+              <td>
+                <span th:if="${n.read}" class="badge badge-secondary">Read</span>
+                <span th:unless="${n.read}" class="badge badge-warning">Unread</span>
+              </td>
+              <td th:text="${n.createdAt != null ? #temporals.format(n.createdAt, 'dd MMM yyyy HH:mm') : '—'}"></td>
             </tr>
-            <tr th:if="${#lists.isEmpty(notifications.content)}">
-              <td colspan="4" class="text-center text-muted">No notifications found.</td>
+            <tr th:if="${notifications == null or #lists.isEmpty(notifications.content)}">
+              <td colspan="6" class="text-center text-muted">No notifications found.</td>
             </tr>
           </tbody>
         </table>
