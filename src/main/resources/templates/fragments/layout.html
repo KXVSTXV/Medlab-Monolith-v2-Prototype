@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(title)">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title th:text="${title} + ' | MedLab'">MedLab</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}"/>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script>
+    (function() {
+      const t = localStorage.getItem('medlab-theme') ||
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+</head>
+<body>
+
+<!-- ── Navbar ──────────────────────────────────────────────── -->
+<nav th:fragment="navbar" class="navbar">
+  <div class="navbar-brand">
+    <i class="fa fa-flask"></i> MedLab
+    <button id="theme-toggle" title="Toggle Dark Mode" style="margin-left: 10px;">
+      <i class="fa fa-moon"></i>
+    </button>
+    <span class="version">v2.0</span>
+  </div>
+  <div class="navbar-right">
+    <span class="user-info" sec:authorize="isAuthenticated()">
+      <i class="fa fa-user-circle"></i>
+      <span sec:authentication="name">User</span>
+    </span>
+    <form th:action="@{/logout}" method="post" class="d-inline" style="display:inline;">
+      <button type="submit" class="btn btn-sm btn-danger" style="cursor:pointer;">
+        <i class="fa fa-sign-out-alt"></i> Logout
+      </button>
+    </form>
+  </div>
+</nav>
+
+<!-- ── Sidebar ─────────────────────────────────────────────── -->
+<aside th:fragment="sidebar" class="sidebar">
+  <ul class="sidebar-menu">
+    <li>
+      <a th:href="@{/ui/dashboard}"
+         th:classappend="${requestURI != null and requestURI.contains('dashboard')} ? 'active' : ''">
+        <i class="fa fa-tachometer-alt"></i> Dashboard
+      </a>
+    </li>
+    <li>
+      <a th:href="@{/ui/patients}"
+         th:classappend="${requestURI != null and requestURI.contains('patients')} ? 'active' : ''">
+        <i class="fa fa-users"></i> Patients
+      </a>
+    </li>
+    <li>
+      <a th:href="@{/ui/appointments}"
+         th:classappend="${requestURI != null and requestURI.contains('appointments')} ? 'active' : ''">
+        <i class="fa fa-calendar-check"></i> Appointments
+      </a>
+    </li>
+    <li>
+      <a th:href="@{/ui/samples}"
+         th:classappend="${requestURI != null and requestURI.contains('samples')} ? 'active' : ''">
+        <i class="fa fa-vial"></i> Samples
+      </a>
+    </li>
+    <li>
+      <a th:href="@{/ui/testorders}"
+         th:classappend="${requestURI != null and requestURI.contains('testorders')} ? 'active' : ''">
+        <i class="fa fa-clipboard-list"></i> Test Orders
+      </a>
+    </li>
+    <li>
+      <a th:href="@{/ui/reports}"
+         th:classappend="${requestURI != null and requestURI.contains('reports')} ? 'active' : ''">
+        <i class="fa fa-file-medical-alt"></i> Reports
+      </a>
+    </li>
+    <li>
+      <a th:href="@{/ui/billing}"
+         th:classappend="${requestURI != null and requestURI.contains('billing')} ? 'active' : ''">
+        <i class="fa fa-file-invoice-dollar"></i> Billing
+      </a>
+    </li>
+    <li>
+      <a th:href="@{/ui/notifications}"
+         th:classappend="${requestURI != null and requestURI.contains('notifications')} ? 'active' : ''">
+        <i class="fa fa-bell"></i> Notifications
+      </a>
+    </li>
+    <li sec:authorize="hasAuthority('ROLE_ADMIN')">
+      <a th:href="@{/ui/admin/users}"
+         th:classappend="${requestURI != null and requestURI.contains('admin')} ? 'active' : ''">
+        <i class="fa fa-shield-alt"></i> Admin
+      </a>
+    </li>
+    <li>
+      <a href="/swagger-ui.html" target="_blank">
+        <i class="fa fa-book"></i> API Docs
+      </a>
+    </li>
+  </ul>
+</aside>
+
+<!-- ── Flash messages fragment ──────────────────────────────── -->
+<div th:fragment="flash">
+  <div th:if="${successMsg}" class="alert alert-success" id="flash-msg">
+    <i class="fa fa-check-circle"></i>
+    <span th:text="${successMsg}"></span>
+  </div>
+  <div th:if="${errorMsg}" class="alert alert-danger" id="flash-msg">
+    <i class="fa fa-exclamation-circle"></i>
+    <span th:text="${errorMsg}"></span>
+  </div>
+</div>
+
+<!-- ── Pagination fragment ───────────────────────────────────── -->
+<nav th:fragment="pagination(page, baseUrl)" class="pagination-bar" th:if="${page.totalPages > 1}">
+  <a th:if="${!page.first}"
+     th:href="${baseUrl + '?page=' + (page.number - 1)}"
+     class="btn btn-sm btn-outline">← Prev</a>
+
+  <span class="page-info">
+    Page <strong th:text="${page.number + 1}"></strong>
+    of <strong th:text="${page.totalPages}"></strong>
+    (<span th:text="${page.totalElements}"></span> total)
+  </span>
+
+  <a th:if="${!page.last}"
+     th:href="${baseUrl + '?page=' + (page.number + 1)}"
+     class="btn btn-sm btn-outline">Next →</a>
+</nav>
+
+</body>
+</html>

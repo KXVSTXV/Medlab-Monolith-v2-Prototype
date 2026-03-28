@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
+<body class="app-body">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="app-layout">
+  <aside th:replace="~{fragments/layout :: sidebar}"></aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h2><i class="fa fa-tachometer-alt"></i> Dashboard</h2>
+      <span class="page-subtitle"
+            th:text="'Welcome back, ' + ${user?.fullName ?: user?.username}"></span>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-grid">
+      <div class="stat-card stat-blue">
+        <div class="stat-icon"><i class="fa fa-users"></i></div>
+        <div class="stat-body">
+          <div class="stat-number" th:text="${patientCount}">0</div>
+          <div class="stat-label">Total Patients</div>
+        </div>
+      </div>
+      <div class="stat-card stat-green">
+        <div class="stat-icon"><i class="fa fa-clipboard-list"></i></div>
+        <div class="stat-body">
+          <div class="stat-number" th:text="${pendingOrders}">0</div>
+          <div class="stat-label">Active Orders</div>
+        </div>
+      </div>
+      <div class="stat-card stat-orange">
+        <div class="stat-icon"><i class="fa fa-file-medical-alt"></i></div>
+        <div class="stat-body">
+          <div class="stat-number" th:text="${recentReports?.size() ?: 0}">0</div>
+          <div class="stat-label">Recent Reports</div>
+        </div>
+      </div>
+      <div class="stat-card stat-purple">
+        <div class="stat-icon"><i class="fa fa-flask"></i></div>
+        <div class="stat-body">
+          <div class="stat-number">4</div>
+          <div class="stat-label">Core Services</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <i class="fa fa-bolt"></i> Quick Actions
+      </div>
+      <div class="card-body quick-actions">
+        <a th:href="@{/ui/patients/new}" class="btn btn-primary">
+          <i class="fa fa-user-plus"></i> New Patient
+        </a>
+        <a th:href="@{/ui/appointments/new}" class="btn btn-success">
+          <i class="fa fa-calendar-plus"></i> Schedule Appointment
+        </a>
+        <a th:href="@{/ui/samples}" class="btn btn-info">
+          <i class="fa fa-vial"></i> Collect Sample
+        </a>
+        <a th:href="@{/ui/testorders}" class="btn btn-warning">
+          <i class="fa fa-microscope"></i> Test Orders
+        </a>
+        <a href="/swagger-ui.html" target="_blank" class="btn btn-outline">
+          <i class="fa fa-book"></i> API Docs
+        </a>
+      </div>
+    </div>
+
+    <!-- Recent Reports -->
+    <div class="card">
+      <div class="card-header">
+        <i class="fa fa-file-medical-alt"></i> Recent Reports
+        <a th:href="@{/ui/reports}" class="btn btn-sm btn-outline float-right">View All</a>
+      </div>
+      <div class="card-body p-0">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Report #</th>
+              <th>Patient</th>
+              <th>Generated</th>
+              <th>Status</th>
+              <th>Abnormal</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:if="${recentReports == null or #lists.isEmpty(recentReports)}">
+              <td colspan="6" class="text-center text-muted">No reports yet.</td>
+            </tr>
+            <tr th:each="report : ${recentReports}">
+              <td><code th:text="${report.reportNumber}"></code></td>
+              <td th:text="${report.patient?.fullName}"></td>
+              <td th:text="${#temporals.format(report.generatedAt, 'dd MMM yyyy HH:mm')}"></td>
+              <td>
+                <span class="badge"
+                      th:classappend="${report.status.name() == 'RELEASED'} ? 'badge-success'
+                                     : (${report.status.name() == 'VERIFIED'} ? 'badge-info'
+                                     : 'badge-warning')"
+                      th:text="${report.status}"></span>
+              </td>
+              <td>
+                <span th:if="${report.hasAbnormal}" class="badge badge-danger">⚠ YES</span>
+                <span th:unless="${report.hasAbnormal}" class="badge badge-success">NORMAL</span>
+              </td>
+              <td>
+                <a th:href="@{/ui/reports/{id}(id=${report.id})}"
+                   class="btn btn-sm btn-outline">View</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

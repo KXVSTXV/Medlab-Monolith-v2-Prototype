@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Register Patient')}"></head>
+<body class="app-body">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="app-layout">
+  <aside th:replace="~{fragments/layout :: sidebar}"></aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h2><i class="fa fa-user-plus"></i> Register New Patient</h2>
+      <a th:href="@{/ui/patients}" class="btn btn-outline">
+        <i class="fa fa-arrow-left"></i> Back to Patients
+      </a>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><i class="fa fa-id-card"></i> Patient Demographics</div>
+      <div class="card-body">
+        <div id="form-error" class="alert alert-danger" style="display:none"></div>
+        <div id="form-success" class="alert alert-success" style="display:none"></div>
+
+        <form id="patient-form" novalidate>
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label>Full Name <span class="required">*</span></label>
+              <input type="text" id="fullName" class="form-control"
+                     placeholder="e.g. John Doe" required/>
+            </div>
+            <div class="form-group col-3">
+              <label>Date of Birth <span class="required">*</span></label>
+              <input type="date" id="dob" class="form-control" required/>
+            </div>
+            <div class="form-group col-3">
+              <label>Gender <span class="required">*</span></label>
+              <select id="gender" class="form-control" required>
+                <option value="">Select…</option>
+                <option th:each="g : ${genders}" th:value="${g}" th:text="${g}"></option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-4">
+              <label>Email</label>
+              <input type="email" id="email" class="form-control"
+                     placeholder="patient@example.com"/>
+            </div>
+            <div class="form-group col-4">
+              <label>Mobile Number</label>
+              <input type="tel" id="mobileNumber" class="form-control"
+                     placeholder="10-digit mobile number"
+                     pattern="[0-9]{10,15}"/>
+            </div>
+            <div class="form-group col-4">
+              <label>Blood Group</label>
+              <select id="bloodGroup" class="form-control">
+                <option value="">Unknown</option>
+                <option>A+</option><option>A-</option>
+                <option>B+</option><option>B-</option>
+                <option>AB+</option><option>AB-</option>
+                <option>O+</option><option>O-</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-12">
+              <label>Address</label>
+              <input type="text" id="address" class="form-control"
+                     placeholder="Full postal address"/>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label>Known Allergies</label>
+              <textarea id="allergies" class="form-control" rows="2"
+                        placeholder="List any known allergies…"></textarea>
+            </div>
+            <div class="form-group col-6">
+              <label>Medical History</label>
+              <textarea id="medicalHistory" class="form-control" rows="2"
+                        placeholder="Relevant past conditions, surgeries…"></textarea>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="consentGiven"/>
+              Patient has given informed consent for testing and data processing
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-primary" onclick="submitPatient()">
+              <i class="fa fa-save"></i> Register Patient
+            </button>
+            <a th:href="@{/ui/patients}" class="btn btn-outline">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script th:src="@{/js/app.js}"></script>
+<script>
+async function submitPatient() {
+  const payload = {
+    fullName:      document.getElementById('fullName').value.trim(),
+    dob:           document.getElementById('dob').value,
+    gender:        document.getElementById('gender').value,
+    email:         document.getElementById('email').value.trim() || null,
+    mobileNumber:  document.getElementById('mobileNumber').value.trim() || null,
+    address:       document.getElementById('address').value.trim() || null,
+    bloodGroup:    document.getElementById('bloodGroup').value || null,
+    allergies:     document.getElementById('allergies').value.trim() || null,
+    medicalHistory:document.getElementById('medicalHistory').value.trim() || null,
+    consentGiven:  document.getElementById('consentGiven').checked
+  };
+
+  if (!payload.fullName || !payload.dob || !payload.gender) {
+    showFormError('Full name, date of birth and gender are required.');
+    return;
+  }
+
+  try {
+    const data = await apiFetch('/api/patients', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    document.getElementById('form-error').style.display = 'none';
+    const success = document.getElementById('form-success');
+    success.textContent = `Patient registered! MRN: ${data.medicalRecordNumber}. Redirecting…`;
+    success.style.display = 'block';
+    setTimeout(() => window.location.href = '/ui/patients/' + data.id, 1500);
+  } catch (err) {
+    showFormError(err.message);
+  }
+}
+
+function showFormError(msg) {
+  const el = document.getElementById('form-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+  document.getElementById('form-success').style.display = 'none';
+}
+</script>
+</body>
+</html>

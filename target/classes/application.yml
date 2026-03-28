@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: medlab
+
+  # JPA defaults — profile-specific files override datasource & ddl-auto
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+
+  # Thymeleaf
+  thymeleaf:
+    cache: true
+    encoding: UTF-8
+    mode: HTML
+
+  # Validation messages
+  messages:
+    basename: messages
+    encoding: UTF-8
+
+  # Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+
+# JWT — secret & expiry overridden per profile via env vars / profile yml
+app:
+  jwt:
+    secret: 7d8f2a1c9b3e4f5a6d7c8b9a0e1f2d3c4b5a69788d9e0f1a2b3c4d5e6f7a8b9c
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}   # 24 h
+  pagination:
+    default-page-size: 20
+    max-page-size: 100
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

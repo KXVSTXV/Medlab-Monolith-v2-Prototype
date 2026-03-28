@@ -1,0 +1,51 @@
+MySQL setup
+
+-- Run this once in MySQL Workbench or terminal
+CREATE DATABASE IF NOT EXISTS medlab_db
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+Flyway will create all tables and seed all data automatically on first startup. You do NOT need to run any SQL manually.
+
+------------------------------------------------------------------------------
+
+Open the app
+URL --- http://localhost:8081/login
+What you'll see --- Login page
+
+URL --- http://localhost:8081/ui/dashboard
+What you'll see --- Dashboard (after login)
+
+URL --- http://localhost:8081/swagger-ui.html
+What you'll see --- API docs
+
+Login with:- admin / Admin@123
+
+If You Still Get Errors After the Above
+The most common remaining issues and their fixes:
+
+Error --- Unable to connect to database
+Fix --- MySQL not running, or wrong password in env var / yml
+
+Error --- Flyway checksum mismatch
+Fix --- Run DROP DATABASE medlab_db; CREATE DATABASE medlab_db; and restart
+
+Error --- JWT secret too short
+Fix --- Make sure JWT_SECRET is at least 32 characters
+
+Error --- Port 8081 already in use
+Fix --- Add server.port=8082 to application-dev.yml
+
+Error --- Lombok not processing
+Fix --- In IntelliJ: Settings → Build → Compiler → Annotation Processors → Enable
+
+------------------------------------------------------------------------------------------
+To run the project, do these steps:-
+
+FIRST GO TO PROJECT ROOT (WHERE POM.XML IS)
+THEN GO TO CMD FROM THAT LOCATION
+THEN COPY/PASTE THE FOLLOWING COMMAND
+
+mvn spring-boot:run -Dspring-boot.run.profiles=dev -Dmaven.test.skip=true
+
+--------------------------------------------------------------

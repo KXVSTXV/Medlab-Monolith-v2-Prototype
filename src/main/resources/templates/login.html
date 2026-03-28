@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Login | MedLab</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}"/>
+</head>
+<body class="login-body">
+
+<div class="login-container">
+  <div class="login-logo">
+    <span class="logo-icon">🔬</span>
+    <h1>MedLab</h1>
+    <p class="login-subtitle">Medical Laboratory System v2.0</p>
+  </div>
+
+  <!-- Error / logout alerts -->
+  <div th:if="${param.error}" class="alert alert-danger">
+    <strong>Login failed.</strong> Invalid username or password.
+  </div>
+  <div th:if="${param.logout}" class="alert alert-success">
+    You have been logged out successfully.
+  </div>
+
+  <form th:action="@{/login}" method="post" class="login-form">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+    <div class="form-group">
+      <label for="username"><i class="fa fa-user"></i> Username</label>
+      <input type="text" id="username" name="username"
+             class="form-control" placeholder="Enter username"
+             autofocus autocomplete="username" required/>
+    </div>
+
+    <div class="form-group">
+      <label for="password"><i class="fa fa-lock"></i> Password</label>
+      <input type="password" id="password" name="password"
+             class="form-control" placeholder="Enter password"
+             autocomplete="current-password" required/>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-block">
+      <i class="fa fa-sign-in-alt"></i> Sign In
+    </button>
+  </form>
+
+  <div class="login-hint">
+    <p><strong>Default credentials:</strong></p>
+    <table class="hint-table">
+      <tr><td>admin</td><td>Admin@123</td><td>ADMIN</td></tr>
+      <tr><td>labtech1</td><td>Admin@123</td><td>LAB_TECH</td></tr>
+      <tr><td>reception1</td><td>Admin@123</td><td>RECEPTION</td></tr>
+    </table>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
+</body>
+</html>

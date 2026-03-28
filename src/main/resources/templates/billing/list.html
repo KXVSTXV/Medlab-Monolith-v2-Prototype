@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head th:replace="~{fragments/layout :: head('Billing')}"></head>
+<body class="app-body">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="app-layout">
+  <aside th:replace="~{fragments/layout :: sidebar}"></aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h2><i class="fa fa-file-invoice-dollar"></i> Invoices</h2>
+    </div>
+
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <!-- Pay modal -->
+    <div id="pay-modal" class="modal" style="display:none">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3>Record Payment</h3>
+          <button onclick="closePayModal()" class="btn-close">×</button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="pay-invoice-id"/>
+          <div class="form-group">
+            <label>Amount (₹)</label>
+            <input type="number" id="pay-amount" class="form-control"
+                   step="0.01" min="0.01"/>
+          </div>
+          <div class="form-group">
+            <label>Payment Method</label>
+            <select id="pay-method" class="form-control">
+              <option value="CASH">Cash</option>
+              <option value="CARD">Card</option>
+              <option value="UPI">UPI</option>
+              <option value="NET_BANKING">Net Banking</option>
+              <option value="CHEQUE">Cheque</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-block" onclick="submitPayment()">
+            <i class="fa fa-credit-card"></i> Confirm Payment
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Invoice #</th>
+              <th>Patient</th>
+              <th>Amount</th>
+              <th>Tax</th>
+              <th>Due Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:if="${invoices.content.isEmpty()}">
+              <td colspan="7" class="text-center text-muted">No invoices found.</td>
+            </tr>
+            <tr th:each="inv : ${invoices.content}">
+              <td><code th:text="${inv.invoiceNumber}"></code></td>
+              <td th:text="${inv.patient?.fullName}"></td>
+              <td>₹<span th:text="${#numbers.formatDecimal(inv.amount,1,'COMMA',2,'POINT')}"></span></td>
+              <td>₹<span th:text="${#numbers.formatDecimal(inv.taxAmount,1,'COMMA',2,'POINT')}"></span></td>
+              <td th:text="${inv.dueDate != null ? #temporals.format(inv.dueDate,'dd MMM yyyy') : '—'}"></td>
+              <td>
+                <span class="badge"
+                      th:classappend="${inv.status.name() == 'PAID'} ? 'badge-success'
+                                     : (${inv.status.name() == 'CANCELLED'} ? 'badge-danger'
+                                     : (${inv.status.name() == 'OVERDUE'} ? 'badge-warning'
+                                     : 'badge-info'))"
+                      th:text="${inv.status}"></span>
+              </td>
+              <td class="actions">
+                <button th:if="${inv.status.name() == 'PENDING' or inv.status.name() == 'OVERDUE'}"
+                        class="btn btn-sm btn-success"
+                        sec:authorize="hasAnyAuthority('ROLE_ADMIN','ROLE_BILLING','ROLE_RECEPTION')"
+                        th:onclick="|openPayModal(${inv.id}, ${inv.amount})|">
+                  <i class="fa fa-credit-card"></i> Pay
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div th:replace="~{fragments/layout :: pagination(${invoices}, '/ui/billing')}"></div>
+  </main>
+</div>
+<script th:src="@{/js/app.js}"></script>
+<script>
+function openPayModal(id, amount) {
+  document.getElementById('pay-invoice-id').value = id;
+  document.getElementById('pay-amount').value = amount;
+  document.getElementById('pay-modal').style.display = 'flex';
+}
+function closePayModal() {
+  document.getElementById('pay-modal').style.display = 'none';
+}
+async function submitPayment() {
+  const id     = document.getElementById('pay-invoice-id').value;
+  const amount = document.getElementById('pay-amount').value;
+  const method = document.getElementById('pay-method').value;
+  try {
+    await apiFetch('/api/billing/invoices/' + id + '/pay', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: parseFloat(amount), method })
+    });
+    closePayModal();
+    location.reload();
+  } catch(e) { alert('Payment error: ' + e.message); }
+}
+</script>
+</body>
+</html>

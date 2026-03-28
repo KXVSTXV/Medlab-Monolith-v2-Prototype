@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head th:replace="~{fragments/layout :: head('Reports')}"></head>
+<body class="app-body">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="app-layout">
+  <aside th:replace="~{fragments/layout :: sidebar}"></aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h2><i class="fa fa-file-medical-alt"></i> Lab Reports</h2>
+    </div>
+
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <div class="card">
+      <div class="card-body p-0">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Report #</th>
+              <th>Patient</th>
+              <th>MRN</th>
+              <th>Generated</th>
+              <th>Prepared By</th>
+              <th>Status</th>
+              <th>Abnormal</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:if="${reports.content.isEmpty()}">
+              <td colspan="8" class="text-center text-muted">No reports found.</td>
+            </tr>
+            <tr th:each="r : ${reports.content}">
+              <td><code th:text="${r.reportNumber}"></code></td>
+              <td th:text="${r.patient?.fullName}"></td>
+              <td><code th:text="${r.patient?.medicalRecordNumber}"></code></td>
+              <td th:text="${r.generatedAt != null
+                ? #temporals.format(r.generatedAt,'dd MMM yyyy HH:mm') : '—'}"></td>
+              <td th:text="${r.preparedBy ?: '—'}"></td>
+              <td>
+                <span class="badge"
+                      th:classappend="${r.status.name() == 'RELEASED'} ? 'badge-success'
+                                     : (${r.status.name() == 'VERIFIED'} ? 'badge-info'
+                                     : 'badge-warning')"
+                      th:text="${r.status}"></span>
+              </td>
+              <td>
+                <span th:if="${r.hasAbnormal}" class="badge badge-danger">⚠ YES</span>
+                <span th:unless="${r.hasAbnormal}" class="badge badge-success">Normal</span>
+              </td>
+              <td class="actions">
+                <a th:href="@{/ui/reports/{id}(id=${r.id})}"
+                   class="btn btn-sm btn-outline" title="View">
+                  <i class="fa fa-eye"></i>
+                </a>
+                <a th:href="@{/ui/reports/{id}/download(id=${r.id})}"
+                   class="btn btn-sm btn-info" title="Download">
+                  <i class="fa fa-download"></i>
+                </a>
+                <button th:if="${r.status.name() == 'DRAFT'}"
+                        class="btn btn-sm btn-success"
+                        sec:authorize="hasAnyAuthority('ROLE_ADMIN','ROLE_LAB_MANAGER','ROLE_DOCTOR')"
+                        th:onclick="|verifyReport(${r.id})|" title="Verify">
+                  <i class="fa fa-check"></i>
+                </button>
+                <button th:if="${r.status.name() == 'VERIFIED'}"
+                        class="btn btn-sm btn-primary"
+                        sec:authorize="hasAnyAuthority('ROLE_ADMIN','ROLE_LAB_MANAGER')"
+                        th:onclick="|releaseReport(${r.id})|" title="Release">
+                  <i class="fa fa-paper-plane"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div th:replace="~{fragments/layout :: pagination(${reports}, '/ui/reports')}"></div>
+  </main>
+</div>
+<script th:src="@{/js/app.js}"></script>
+<script>
+function verifyReport(id) {
+  if (!confirm('Verify report #' + id + '?')) return;
+  apiFetch('/api/reports/' + id + '/verify', { method: 'POST' })
+    .then(() => location.reload())
+    .catch(e => alert('Error: ' + e.message));
+}
+function releaseReport(id) {
+  if (!confirm('Release report #' + id + '? This will notify the patient.')) return;
+  apiFetch('/api/reports/' + id + '/release', { method: 'POST' })
+    .then(() => location.reload())
+    .catch(e => alert('Error: ' + e.message));
+}
+</script>
+</body>
+</html>

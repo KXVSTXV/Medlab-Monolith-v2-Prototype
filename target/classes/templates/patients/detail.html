@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head th:replace="~{fragments/layout :: head('Patient Detail')}"></head>
+<body class="app-body">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="app-layout">
+  <aside th:replace="~{fragments/layout :: sidebar}"></aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h2>
+        <i class="fa fa-user-circle"></i>
+        <span th:text="${patient.fullName}">Patient</span>
+        <code class="mrn-badge" th:text="${patient.medicalRecordNumber}"></code>
+      </h2>
+      <div>
+        <a th:href="@{/ui/patients}" class="btn btn-outline">
+          <i class="fa fa-arrow-left"></i> Back
+        </a>
+        <a th:href="@{/ui/appointments/new}" class="btn btn-success"
+           sec:authorize="hasAnyAuthority('ROLE_ADMIN','ROLE_RECEPTION','ROLE_LAB_MANAGER')">
+          <i class="fa fa-calendar-plus"></i> New Appointment
+        </a>
+      </div>
+    </div>
+
+    <!-- Demographics Card -->
+    <div class="card mb-4">
+      <div class="card-header"><i class="fa fa-id-card"></i> Demographics</div>
+      <div class="card-body">
+        <div class="detail-grid">
+          <div class="detail-item">
+            <label>Date of Birth</label>
+            <span th:text="${patient.dob != null ? #temporals.format(patient.dob,'dd MMM yyyy') : '—'}"></span>
+          </div>
+          <div class="detail-item">
+            <label>Gender</label>
+            <span th:text="${patient.gender}"></span>
+          </div>
+          <div class="detail-item">
+            <label>Blood Group</label>
+            <span th:text="${patient.bloodGroup ?: '—'}"></span>
+          </div>
+          <div class="detail-item">
+            <label>Mobile</label>
+            <span th:text="${patient.mobileNumber ?: '—'}"></span>
+          </div>
+          <div class="detail-item">
+            <label>Email</label>
+            <span th:text="${patient.email ?: '—'}"></span>
+          </div>
+          <div class="detail-item">
+            <label>Address</label>
+            <span th:text="${patient.address ?: '—'}"></span>
+          </div>
+          <div class="detail-item">
+            <label>Consent</label>
+            <span th:if="${patient.consentGiven}" class="badge badge-success">Given</span>
+            <span th:unless="${patient.consentGiven}" class="badge badge-warning">Pending</span>
+          </div>
+          <div class="detail-item">
+            <label>Status</label>
+            <span class="badge badge-success" th:text="${patient.status}"></span>
+          </div>
+        </div>
+        <div th:if="${patient.allergies}" class="detail-section">
+          <label><i class="fa fa-exclamation-triangle text-warning"></i> Allergies</label>
+          <p th:text="${patient.allergies}"></p>
+        </div>
+        <div th:if="${patient.medicalHistory}" class="detail-section">
+          <label><i class="fa fa-history"></i> Medical History</label>
+          <p th:text="${patient.medicalHistory}"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Appointments -->
+    <div class="card mb-4">
+      <div class="card-header"><i class="fa fa-calendar-check"></i> Appointments</div>
+      <div class="card-body p-0">
+        <table class="table">
+          <thead>
+            <tr><th>ID</th><th>Scheduled</th><th>Location</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr th:if="${appointments.isEmpty()}">
+              <td colspan="4" class="text-center text-muted">No appointments yet.</td>
+            </tr>
+            <tr th:each="a : ${appointments}">
+              <td th:text="${a.id}"></td>
+              <td th:text="${#temporals.format(a.scheduledAt,'dd MMM yyyy HH:mm')}"></td>
+              <td th:text="${a.location ?: '—'}"></td>
+              <td>
+                <span class="badge"
+                      th:classappend="${a.status.name() == 'COMPLETED'} ? 'badge-success'
+                                     : (${a.status.name() == 'CANCELLED'} ? 'badge-danger'
+                                     : 'badge-info')"
+                      th:text="${a.status}"></span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Recent Reports -->
+    <div class="card">
+      <div class="card-header"><i class="fa fa-file-medical-alt"></i> Reports</div>
+      <div class="card-body p-0">
+        <table class="table">
+          <thead>
+            <tr><th>Report #</th><th>Generated</th><th>Status</th><th>Abnormal</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr th:if="${reports.isEmpty()}">
+              <td colspan="5" class="text-center text-muted">No reports yet.</td>
+            </tr>
+            <tr th:each="r : ${reports}">
+              <td><code th:text="${r.reportNumber}"></code></td>
+              <td th:text="${r.generatedAt != null ? #temporals.format(r.generatedAt,'dd MMM yyyy') : '—'}"></td>
+              <td>
+                <span class="badge"
+                      th:classappend="${r.status.name() == 'RELEASED'} ? 'badge-success'
+                                     : (${r.status.name() == 'VERIFIED'} ? 'badge-info'
+                                     : 'badge-warning')"
+                      th:text="${r.status}"></span>
+              </td>
+              <td>
+                <span th:if="${r.hasAbnormal}" class="badge badge-danger">⚠ YES</span>
+                <span th:unless="${r.hasAbnormal}" class="badge badge-success">Normal</span>
+              </td>
+              <td>
+                <a th:href="@{/ui/reports/{id}(id=${r.id})}" class="btn btn-sm btn-outline">
+                  <i class="fa fa-eye"></i>
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Audit Logs')}"></head>
+<body class="app-body">
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="app-layout">
+  <aside th:replace="~{fragments/layout :: sidebar}"></aside>
+  <main class="main-content">
+    <div class="page-header"><h2><i class="fa fa-history"></i> Audit Logs</h2></div>
+    <div class="card">
+      <div class="card-body">
+        <p>Audit logs will be mapped here from the REST API or future implementations.</p>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

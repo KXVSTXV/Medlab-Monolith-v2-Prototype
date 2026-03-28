@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head th:replace="~{fragments/layout :: head('Report Detail')}"></head>
+<body class="app-body">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="app-layout">
+  <aside th:replace="~{fragments/layout :: sidebar}"></aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h2>
+        <i class="fa fa-file-medical-alt"></i>
+        Report <code th:text="${report.reportNumber}"></code>
+        <span th:if="${report.hasAbnormal}" class="badge badge-danger ml-2">⚠ ABNORMAL</span>
+      </h2>
+      <div>
+        <a th:href="@{/ui/reports}" class="btn btn-outline">
+          <i class="fa fa-arrow-left"></i> Back
+        </a>
+        <a th:href="@{/ui/reports/{id}/download(id=${report.id})}"
+           class="btn btn-info">
+          <i class="fa fa-download"></i> Download
+        </a>
+        <button th:if="${report.status.name() == 'DRAFT'}"
+                class="btn btn-success"
+                sec:authorize="hasAnyAuthority('ROLE_ADMIN','ROLE_LAB_MANAGER','ROLE_DOCTOR')"
+                th:onclick="|verifyReport(${report.id})|">
+          <i class="fa fa-check"></i> Verify
+        </button>
+        <button th:if="${report.status.name() == 'VERIFIED'}"
+                class="btn btn-primary"
+                sec:authorize="hasAnyAuthority('ROLE_ADMIN','ROLE_LAB_MANAGER')"
+                th:onclick="|releaseReport(${report.id})|">
+          <i class="fa fa-paper-plane"></i> Release to Patient
+        </button>
+      </div>
+    </div>
+
+    <!-- Report meta -->
+    <div class="card mb-4">
+      <div class="card-header"><i class="fa fa-info-circle"></i> Report Information</div>
+      <div class="card-body">
+        <div class="detail-grid">
+          <div class="detail-item">
+            <label>Patient</label>
+            <a th:href="@{/ui/patients/{id}(id=${report.patient?.id})}"
+               th:text="${report.patient?.fullName}" class="text-link"></a>
+          </div>
+          <div class="detail-item">
+            <label>MRN</label>
+            <code th:text="${report.patient?.medicalRecordNumber}"></code>
+          </div>
+          <div class="detail-item">
+            <label>Generated</label>
+            <span th:text="${report.generatedAt != null
+              ? #temporals.format(report.generatedAt,'dd MMM yyyy HH:mm') : '—'}"></span>
+          </div>
+          <div class="detail-item">
+            <label>Status</label>
+            <span class="badge"
+                  th:classappend="${report.status.name() == 'RELEASED'} ? 'badge-success'
+                                 : (${report.status.name() == 'VERIFIED'} ? 'badge-info'
+                                 : 'badge-warning')"
+                  th:text="${report.status}"></span>
+          </div>
+          <div class="detail-item">
+            <label>Prepared By</label>
+            <span th:text="${report.preparedBy ?: '—'}"></span>
+          </div>
+          <div class="detail-item">
+            <label>Verified By</label>
+            <span th:text="${report.verifiedBy ?: '—'}"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="card" th:if="${report.summary}">
+      <div class="card-header"><i class="fa fa-list-alt"></i> Results Summary</div>
+      <div class="card-body">
+        <pre class="report-summary" th:text="${report.summary}"></pre>
+      </div>
+    </div>
+
+  </main>
+</div>
+<script th:src="@{/js/app.js}"></script>
+<script>
+function verifyReport(id) {
+  if (!confirm('Mark report #' + id + ' as VERIFIED?')) return;
+  apiFetch('/api/reports/' + id + '/verify', { method: 'POST' })
+    .then(() => location.reload()).catch(e => alert('Error: ' + e.message));
+}
+function releaseReport(id) {
+  if (!confirm('RELEASE report #' + id + '? The patient will be notified.')) return;
+  apiFetch('/api/reports/' + id + '/release', { method: 'POST' })
+    .then(() => location.reload()).catch(e => alert('Error: ' + e.message));
+}
+</script>
+</body>
+</html>

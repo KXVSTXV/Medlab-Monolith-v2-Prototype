@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/layout :: head('Admin Users')}"></head>
+<body class="app-body">
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<div class="app-layout">
+  <aside th:replace="~{fragments/layout :: sidebar}"></aside>
+  <main class="main-content">
+    <div class="page-header"><h2><i class="fa fa-users"></i> Users Admin</h2></div>
+    <div class="card">
+      <div class="card-body">
+        <table class="table">
+          <thead><tr><th>ID</th><th>Username</th><th>Email</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr th:each="u : ${users}">
+              <td th:text="${u.id}"></td>
+              <td th:text="${u.username}"></td>
+              <td th:text="${u.email}"></td>
+              <td th:text="${u.status}"></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(users.content)}">
+              <td colspan="4" class="text-center text-muted">No users found.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>
